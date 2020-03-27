@@ -250,7 +250,7 @@ set(source_c_files
     ${DNS_C_FILE}
 )
 
-if(UNIX) #LINUX OR APPLE
+if((UNIX) OR (LINUX)) #LINUX OR APPLE
     set(source_c_files ${source_c_files}
         ./adapters/linux_time.c
     )
@@ -378,7 +378,7 @@ set(source_h_files
     ${LOGGING_STACKTRACE_H_FILE}
 )
 
-if(UNIX) #LINUX OR APPLE
+if((UNIX) OR (LINUX)) #LINUX OR APPLE
     set(source_h_files ${source_h_files}
         ./adapters/linux_time.h
     )

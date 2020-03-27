@@ -29,6 +29,7 @@
 #include <net/lwip/tcp.h>
 #else
 #include <netinet/tcp.h>
+#include <nuttx/net/tcp.h>
 #endif
 #include <netdb.h>
 #include <unistd.h>
@@ -47,6 +48,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
+#include <sys/time.h>
 
 #define SOCKET_SUCCESS                 0
 #define INVALID_SOCKET                 -1
@@ -547,7 +549,7 @@ static int get_network_interface_descriptions(int socket, NETWORK_INTERFACE_DESC
     ifc.ifc_len = sizeof(buf);
     ifc.ifc_buf = buf;
 
-    if (ioctl(socket, SIOCGIFCONF, &ifc) == -1)
+    if (ioctl(socket, SIOCGIFCONF, (unsigned long)&ifc) == -1)
     {
         LogError("ioctl failed querying socket (SIOCGIFCONF, errno=%d)", errno);
         result = MU_FAILURE;
@@ -566,19 +568,19 @@ static int get_network_interface_descriptions(int socket, NETWORK_INTERFACE_DESC
         {
             strcpy(ifr.ifr_name, it->ifr_name);
 
-            if (ioctl(socket, SIOCGIFFLAGS, &ifr) != 0)
+            if (ioctl(socket, SIOCGIFFLAGS, (unsigned long)&ifr) != 0)
             {
                 LogError("ioctl failed querying socket (SIOCGIFFLAGS, errno=%d)", errno);
                 result = MU_FAILURE;
                 break;
             }
-            else if (ioctl(socket, SIOCGIFHWADDR, &ifr) != 0)
+            else if (ioctl(socket, SIOCGIFHWADDR, (unsigned long)&ifr) != 0)
             {
                 LogError("ioctl failed querying socket (SIOCGIFHWADDR, errno=%d)", errno);
                 result = MU_FAILURE;
                 break;
             }
-            else if (ioctl(socket, SIOCGIFADDR, &ifr) != 0)
+            else if (ioctl(socket, SIOCGIFADDR, (unsigned long)&ifr) != 0)
             {
                 LogError("ioctl failed querying socket (SIOCGIFADDR, errno=%d)", errno);
                 result = MU_FAILURE;
@@ -638,10 +640,19 @@ static int set_target_network_interface(int socket, char* mac_address)
             LogError("Did not find a network interface matching MAC ADDRESS");
             result = MU_FAILURE;
         }
-        else if (setsockopt(socket, SOL_SOCKET, SO_BINDTODEVICE, current_nid->name, strlen(current_nid->name)) != 0)
-        {
-            LogError("setsockopt failed (%d)", errno);
-            result = MU_FAILURE;
+        //else if (setsockopt(socket, SOL_SOCKET, SO_BINDTODEVICE, current_nid->name, strlen(current_nid->name)) != 0)
+        //{
+        //    LogError("setsockopt failed (%d)", errno);
+        //    result = MU_FAILURE;
+        //}
+        else if (true){
+            /* Use bind() to bind socket ? */
+            struct sockaddr_in socket_addr_in;
+            memset(&socket_addr_in, 0, sizeof(socket_addr_in));
+            socket_addr_in.sin_family      = AF_INET;
+            socket_addr_in.sin_port        = htons(443);
+            inet_aton(current_nid->ip_address, &socket_addr_in.sin_addr);
+            int ret = bind(socket, (struct sockaddr *)&socket_addr_in, sizeof(socket_addr_in));
         }
         else
         {

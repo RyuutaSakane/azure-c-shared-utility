@@ -23,7 +23,7 @@ pthread_cond_t* create_cond(void)
 #else
         pthread_condattr_t cattr;
         pthread_condattr_init(&cattr);
-        pthread_condattr_setclock(&cattr, time_basis);
+        //Not supported by Nuttx! pthread_condattr_setclock(&cattr, time_basis);
         pthread_cond_init(cond, &cattr);
         pthread_condattr_destroy(&cattr);
 #endif

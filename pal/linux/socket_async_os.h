@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <netinet/in.h>
-#include <netinet/tcp.h>
+#include <nuttx/net/tcp.h>
 #include <sys/errno.h>
 #include <fcntl.h>
 #include <unistd.h>
